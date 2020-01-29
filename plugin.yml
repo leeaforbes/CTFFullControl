@@ -1,0 +1,10 @@
+name: CaptureTheFlag
+main: com.javabean.ctf.CaptureTheFlag
+author: JavaBean
+description: Allows admins to create Capture the Flag arenas.
+version: 1.0
+api-version: 1.15
+commands:
+   ctf:
+      description: JavaBean CTF command.
+      usage: /ctf
