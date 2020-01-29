@@ -58,6 +58,7 @@ public class CaptureTheFlag extends JavaPlugin{
 		getServer().getPluginManager().registerEvents(new CTFListener(gameManager, arenaMap), this);
 		
 		//TODO commit to git from command line
+		//TODO GIT COMMIT
 		//THIS IS NOW DONE IN parseXMLGameData()
 		//hubSpawn = new Location(Bukkit.getServer().getWorlds().get(0), -285.5, 76.00, -132.5, 0, 0);
 		
