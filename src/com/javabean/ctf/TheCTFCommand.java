@@ -18,30 +18,31 @@ public class TheCTFCommand implements CommandExecutor{
 	private CTFGameManager gameManager;
 	private Plugin plugin;
 	
-	public TheCTFCommand(HashMap<String, Arena> a, CTFGameManager ctfgm, Plugin p){
-		arenaMap = a;
+	public TheCTFCommand(CTFGameManager ctfgm, HashMap<String, Arena> a, Plugin p){
 		gameManager = ctfgm;
+		arenaMap = a;
 		plugin = p;
 	}
 	
-	//TODO update all argument possibilities on failure
 	//TODO quickjoin to join the most full game, else random
 	
 	@Override
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args){
-		if (sender instanceof Player) {
+		if(sender instanceof Player){
 			Player player = (Player)sender;
 			String commandSoFar = "/ctf";
 			
+			//no args
 			if(args.length == 0){
 				if(player.isOp()){
-					player.sendMessage(ChatColor.RED + "The " + commandSoFar + " command can have arguments: <arena | addarena | info | join | leave | removearena | start | timeleft>.");
+					player.sendMessage(ChatColor.RED + "The " + commandSoFar + " command can have arguments: <arena | addarena | info | join | leave | removearena | spawn | start | team | timeleft>.");
 				}
 				else{
-					player.sendMessage(ChatColor.RED + "The " + commandSoFar + " command can have arguments: <info | join | leave | start | timeleft>.");
+					player.sendMessage(ChatColor.RED + "The " + commandSoFar + " command can have arguments: <info | join | leave | start | team | timeleft>.");
 				}
 			}
 			else if(args[0].equalsIgnoreCase("join")){
+				commandSoFar += " " + args[0];
 				if(args.length == 2){
 					//arena does not exist
 					if(arenaMap.get(args[1]) == null){
@@ -52,7 +53,7 @@ public class TheCTFCommand implements CommandExecutor{
 					}
 				}
 				else{
-					player.sendMessage(ChatColor.RED + "The " + commandSoFar + " join command can have arguments <arena name>");
+					player.sendMessage(ChatColor.RED + "The " + commandSoFar + " command can have arguments <arena name>");
 				}
 			}
 			else if(args[0].equalsIgnoreCase("leave")){
@@ -67,6 +68,7 @@ public class TheCTFCommand implements CommandExecutor{
 				}
 			}
 			else if(args[0].equalsIgnoreCase("team")){
+				commandSoFar += " " + args[0];
 				//gets what arena game they are in if they are in one
 				Arena playerGameArena = gameManager.getPlayerGameArena(player);
 				if(playerGameArena == null){
@@ -78,7 +80,9 @@ public class TheCTFCommand implements CommandExecutor{
 				else if(args.length == 2){
 					//team does not exist
 					if(playerGameArena.getTeam(args[1]) == null){
-						player.sendMessage(ChatColor.RED + "Team: " + args[1] + " does not exist in arena" + playerGameArena + ".");
+						player.sendMessage(ChatColor.RED + "Team: " + args[1] + " does not exist in arena" + playerGameArena.getName() + ".");
+						player.sendMessage(ChatColor.RED + "Try: " + gameManager.getGame(playerGameArena).getInfo());
+						player.sendMessage(ChatColor.RED + "WARNING: case sensitive");
 					}
 					else{
 						//switch player team
@@ -87,7 +91,7 @@ public class TheCTFCommand implements CommandExecutor{
 					}
 				}
 				else{
-					player.sendMessage(ChatColor.RED + "The " + commandSoFar + " team command can have arguments <team name>");
+					player.sendMessage(ChatColor.RED + "The " + commandSoFar + " command can have arguments <team name>");
 				}
 			}
 			else if(args[0].equalsIgnoreCase("start")){
@@ -98,14 +102,7 @@ public class TheCTFCommand implements CommandExecutor{
 				else if(gameManager.isInProgress(playerGameArena)){
 					player.sendMessage(ChatColor.RED + "Game is already in progress!");
 				}
-//
-//
-//
 //				TODO insert this back in upon further testing
-//				COMMENTED OUT FOR PERSONAL TESING
-//
-//
-//
 //				else if(gameManager.getNumPlayersInArena(playerGameArena) < 2){
 //					player.sendMessage(ChatColor.RED + "There must be at least two players to start a CTF game!");
 //				}
@@ -117,21 +114,27 @@ public class TheCTFCommand implements CommandExecutor{
 			}
 			else if(args[0].equalsIgnoreCase("timeleft")){
 				Arena playerGameArena = gameManager.getPlayerGameArena(player);
-				player.sendMessage(ChatColor.AQUA + "There is " + gameManager.timeLeft(playerGameArena) + " time left in arena: " + playerGameArena.getName() + ".");
+				if(playerGameArena != null){
+					player.sendMessage(ChatColor.AQUA + "There is " + gameManager.timeLeft(playerGameArena) + " time left in arena: " + playerGameArena.getName() + ".");
+				}
+				else{
+					player.sendMessage(ChatColor.RED + "The command /ctf timeleft is used while in a CTF game.");
+				}
 			}
 			else if(args[0].equalsIgnoreCase("info")){
-				player.sendMessage(ChatColor.GOLD + "--------------------------------------------");
+				player.sendMessage(ChatColor.GOLD + "-----------------------------------------------");
 				player.sendMessage(ChatColor.GOLD + "                 ***CTF Games Info***");
 				if(gameManager.getNumGames() == 0){
 					player.sendMessage(ChatColor.RED + "There are no games at the moment.");
-					//TODO make this a quickjoin clickable message
+					player.sendMessage(ChatColor.LIGHT_PURPLE + "Click a join sign in the hub or /ctf join <arena name>");
 				}
 				else{
 					gameManager.getInfo(player);
 					player.sendMessage(ChatColor.LIGHT_PURPLE + "Click to join!");
 				}
-				player.sendMessage(ChatColor.GOLD + "--------------------------------------------");
+				player.sendMessage(ChatColor.GOLD + "-----------------------------------------------");
 			}
+			//incorrect args
 			else if(player.isOp()){
 				if(args[0].equalsIgnoreCase("arena")){
 					arenaSubCommand(player, commandSoFar + " " + args[0], args);
@@ -146,11 +149,11 @@ public class TheCTFCommand implements CommandExecutor{
 					spawnSubCommand(player, commandSoFar + " " + args[0], args);
 				}
 				else{
-					player.sendMessage(ChatColor.RED + "The " + commandSoFar + " command can have arguments: <arena | addarena | info | join | leave | removearena | start | timeleft>.");
+					player.sendMessage(ChatColor.RED + "The " + commandSoFar + " command can have arguments: <arena | addarena | info | join | leave | removearena | spawn | start | team | timeleft>.");
 				}
 			}
 			else{
-				player.sendMessage(ChatColor.RED + "The " + commandSoFar + " command can have arguments: <info | join | leave | start | timeleft>.");
+				player.sendMessage(ChatColor.RED + "The " + commandSoFar + " command can have arguments: <info | join | leave | start | team | timeleft>.");
 			}
 		}
 		return true;
@@ -192,11 +195,11 @@ public class TheCTFCommand implements CommandExecutor{
 				teamColorSubCommand(player, commandSoFar + " " + args[1], args);
 			}
 			else{
-				player.sendMessage(ChatColor.RED + "The " + commandSoFar + " command can have arguments: <addteam | info | removeteam | setbound | addspawn | removespawn | addflag | removeflag>.");
+				player.sendMessage(ChatColor.RED + "The " + commandSoFar + " command can have arguments: <addflag | addspawn | addteam | createsign | info | removeteam | removespawn | removeflag | removesign | setbound>.");
 			}
 		}
 		else{
-			player.sendMessage(ChatColor.RED + "The " + commandSoFar + " command can have arguments: <addteam | info | removeteam | setbound | addspawn | removespawn | addflag | removeflag>.");
+			player.sendMessage(ChatColor.RED + "The " + commandSoFar + " command can have arguments: <addflag | addspawn | addteam | createsign | info | removeteam | removespawn | removeflag | removesign | setbound>.");
 		}
 	}
 

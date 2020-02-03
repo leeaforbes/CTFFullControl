@@ -28,6 +28,9 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.PotionMeta;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 
 public class CTFListener implements Listener{
 	
@@ -222,6 +225,20 @@ public class CTFListener implements Listener{
                 if(victimGameData.numFlagsHolding() > 0){
                 	victimGameData.transferFlagsTo(attackerGameData);
                 	gameManager.notifyPlayers(ChatColor.DARK_GREEN + attacker.getName() + " intercepted " + victim.getName() + "'s flags!", victimArena);
+                }
+                PotionEffectType[] arrowEffectTypes = {PotionEffectType.WEAKNESS, PotionEffectType.SLOW, PotionEffectType.HARM, PotionEffectType.POISON};
+                int randomArrow = (int)(Math.random() * arrowEffectTypes.length) + 1;
+                if(randomArrow == arrowEffectTypes.length){
+                	//give 5 arrows
+                	attacker.getInventory().addItem(new ItemStack(Material.ARROW, 5));
+                }
+                else{
+                	//2 random effects
+                	ItemStack effectArrow = new ItemStack(Material.TIPPED_ARROW, 2);
+                	PotionMeta meta = (PotionMeta)effectArrow.getItemMeta();
+                	meta.addCustomEffect(new PotionEffect(arrowEffectTypes[randomArrow], 7, 1), true);
+                	effectArrow.setItemMeta(meta);
+                	attacker.getInventory().addItem(effectArrow);
                 }
             }
             else{

@@ -125,6 +125,7 @@ public class CTFGame{
 			//give iron leggings and boots
 			player.getInventory().setLeggings(new ItemStack(Material.IRON_LEGGINGS, 1));
 			player.getInventory().setBoots(new ItemStack(Material.IRON_BOOTS, 1));
+			player.getInventory().setItemInOffHand(new ItemStack(Material.SHIELD, 1));
 			
 			makeSoundAtPlayers(Sound.ENTITY_PLAYER_LEVELUP, 0.5f, 1.0f);
 			
@@ -190,9 +191,16 @@ public class CTFGame{
 			player.sendMessage(ChatColor.GOLD + "--------------------------------------------");
 			player.sendMessage(ChatColor.GOLD + "" + ChatColor.BOLD + "              ***Game Stats***");
 			player.sendMessage(ChatColor.DARK_AQUA + "" + ChatColor.UNDERLINE + "Flags Captured");
+			int mostFlags = Integer.MIN_VALUE;
+			Team teamMostFlags = null;
 			for(String teamName : teamData.keySet()){
-				player.sendMessage(ChatColor.GREEN + teamName + ": " + ChatColor.AQUA + teamData.get(teamName).getFlagsCaptured());
+				if(teamData.get(teamName).getFlagsCaptured() > mostFlags){
+					mostFlags = teamData.get(teamName).getFlagsCaptured();
+					teamMostFlags = teamData.get(teamName).getTeam();
+				}
+				player.sendMessage(ChatColor.GREEN + "" + (teamName.equals(playerGameData.getTeam().getName()) ? ChatColor.BOLD + "You " + ChatColor.GOLD : "") + teamName + ": " + ChatColor.AQUA + teamData.get(teamName).getFlagsCaptured());
 			}
+			player.sendMessage(ChatColor.LIGHT_PURPLE + teamMostFlags.getName() + " team won!");
 			player.sendMessage("");
 			player.sendMessage(ChatColor.DARK_AQUA + "" + ChatColor.UNDERLINE + "Personal Stats");
 			player.sendMessage(ChatColor.GREEN + "Flags Captured:    " + ChatColor.AQUA + playerGameData.getFlagsCaptured());
@@ -320,7 +328,6 @@ public class CTFGame{
 		return fewestTeam;
 	}
 	
-	//TODO click to join game
 	public String getInfo(){
 		StringBuilder sb = new StringBuilder();
 		for(String teamName : teamData.keySet()){

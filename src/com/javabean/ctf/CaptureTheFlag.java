@@ -38,6 +38,8 @@ public class CaptureTheFlag extends JavaPlugin{
 	//spawn hub spawn enabled
 	public static boolean hubEnabled;
 	
+	//TODO javadoc everywhere
+	
 	// Fired when plugin is first enabled
 	@Override
 	public void onEnable() {
@@ -51,14 +53,12 @@ public class CaptureTheFlag extends JavaPlugin{
 		parseXMLGameData();
 		
 		//creates commands
-		getCommand("ctf").setExecutor(new TheCTFCommand(arenaMap, gameManager, this));
-		//getCommand("ctf").setTabCompleter(new CTFCommandTabCompleter());
+		getCommand("ctf").setExecutor(new TheCTFCommand(gameManager, arenaMap, this));
+		getCommand("ctf").setTabCompleter(new CTFCommandTabCompleter(gameManager, arenaMap));
 		
 		//event listener
 		getServer().getPluginManager().registerEvents(new CTFListener(gameManager, arenaMap), this);
 		
-		//TODO commit to git from command line
-		//TODO GIT COMMIT
 		//THIS IS NOW DONE IN parseXMLGameData()
 		//hubSpawn = new Location(Bukkit.getServer().getWorlds().get(0), -285.5, 76.00, -132.5, 0, 0);
 		
