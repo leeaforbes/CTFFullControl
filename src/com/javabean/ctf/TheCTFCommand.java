@@ -3,6 +3,7 @@ package com.javabean.ctf;
 import java.util.HashMap;
 
 import org.bukkit.Location;
+import org.bukkit.Sound;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -65,6 +66,7 @@ public class TheCTFCommand implements CommandExecutor{
 					//player leaves arena game
 					gameManager.notifyPlayers(ChatColor.LIGHT_PURPLE + player.getName() + " left arena: " + playerGameArena.getName(), playerGameArena);
 					gameManager.playerLeave(player, playerGameArena);
+					player.playSound(player.getLocation(), Sound.ENTITY_BLAZE_HURT, 0.5f, 1.0f);
 				}
 			}
 			else if(args[0].equalsIgnoreCase("team")){

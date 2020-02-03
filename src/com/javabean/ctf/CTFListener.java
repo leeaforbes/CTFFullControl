@@ -3,13 +3,17 @@ package com.javabean.ctf;
 import java.util.HashMap;
 
 import org.bukkit.ChatColor;
+import org.bukkit.Color;
+import org.bukkit.FireworkEffect;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Firework;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -28,6 +32,7 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -121,6 +126,18 @@ public class CTFListener implements Listener{
 					//have enemy flag
 					if(playerGameData.numFlagsHolding() > 0){
 						captureFlags(playerGameData);
+						
+						//sends firework of team color at flag, put inside block to avoid damage
+						Firework fw = (Firework) playerGameData.getPlayer().getWorld().spawnEntity(new Location(block.getWorld(), block.getX() + 0.5, block.getY() + 0.5, block.getZ() + 0.5), EntityType.FIREWORK);
+						FireworkMeta fwm = fw.getFireworkMeta();
+						fwm.setPower(2);
+						java.awt.Color javaRGB = java.awt.Color.decode(playerGameData.getTeam().getHexColor());
+						Color teamColor = Color.fromRGB(javaRGB.getRed(), javaRGB.getGreen(), javaRGB.getBlue());
+						fwm.addEffect(FireworkEffect.builder().withColor(teamColor).withFlicker().withTrail().build());
+						fw.setFireworkMeta(fwm);
+						fw.detonate();
+						
+						gameManager.getGame(playerArena).makeSoundAtPlayers(Sound.ENTITY_LIGHTNING_BOLT_THUNDER, 1.0f, 1.0f);
 					}
 					else{
 						event.getPlayer().sendMessage(ChatColor.GREEN + "This is your flag! Hit again when you have the enemy flag with you!");
@@ -178,15 +195,16 @@ public class CTFListener implements Listener{
 	}
 	
 	public void captureFlags(PlayerGameData playerGameData){
-		Arena playerArena = gameManager.getPlayerGameArena(playerGameData.getPlayer());
+		Player player = playerGameData.getPlayer();
+		Arena playerArena = gameManager.getPlayerGameArena(player);
 		for(String flagName : playerGameData.getHoldingFlags().keySet()){
 			Flag flag = playerGameData.getHoldingFlags().get(flagName);
 			Team teamFlagCaptured = playerArena.getTeamOfFlagAt(flag.getLocation());
-			gameManager.notifyPlayers(ChatColor.GOLD + "" + ChatColor.BOLD + playerGameData.getPlayer().getName() + " captured " + teamFlagCaptured.getName() + " team's " + flag.getName() + " flag!", playerArena);
+			gameManager.notifyPlayers(ChatColor.GOLD + "" + ChatColor.BOLD + player.getName() + " captured " + teamFlagCaptured.getName() + " team's " + flag.getName() + " flag!", playerArena);
 			//update player stats for flag capture
 			playerGameData.captureFlag();
 			//update team stats for flag capture
-			gameManager.getGame(playerArena).getTeamGameData(playerGameData.getTeam().getName()).captureFlag();;
+			gameManager.getGame(playerArena).getTeamGameData(playerGameData.getTeam().getName()).captureFlag();
 		}
 		//drop all flags
 		playerGameData.dropAllFlags();

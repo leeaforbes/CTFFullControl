@@ -256,6 +256,8 @@ public class CTFGame{
 		System.out.println(player.getName() + " joined " + team.getName());
 		playerData.putIfAbsent(player.getName(), new PlayerGameData(player, team));
 		teamData.get(team.getName()).addPlayer(player);
+		
+		player.playSound(player.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 0.5f, 1.0f);
 	}
 	
 	public void playerLeave(Player player){
@@ -268,6 +270,7 @@ public class CTFGame{
 		player.teleport(playerData.get(player.getName()).getLocationBeforeGame());
 		teamData.get(teamName).removePlayer(player);
 		playerData.remove(player.getName());
+		//TODO play leave sound to player
 	}
 	
 	public boolean isPlayerInGame(Player player){
