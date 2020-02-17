@@ -270,7 +270,6 @@ public class CTFGame{
 		player.teleport(playerData.get(player.getName()).getLocationBeforeGame());
 		teamData.get(teamName).removePlayer(player);
 		playerData.remove(player.getName());
-		//TODO play leave sound to player
 	}
 	
 	public boolean isPlayerInGame(Player player){
